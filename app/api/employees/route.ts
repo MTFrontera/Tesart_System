@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { getNextId } from '@/lib/idGenerator';
 
 export async function GET() {
   try {
@@ -24,15 +25,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     
-    // Get the next EmployeeID by finding the max and adding 1
-    const [maxResults] = await db.execute('SELECT MAX(EmployeeID) as maxId FROM employee');
-    const maxId = (maxResults && maxResults.length > 0) ? (maxResults[0] as any).maxId : 0;
-    const nextEmployeeID = (maxId || 0) + 1;
-    
-    const [result] = await db.execute(
-      'INSERT INTO employee (EmployeeID, FirstName, LastName, Role, ContactNumber, ReportsTo) VALUES (?, ?, ?, ?, ?, ?)',
-      [nextEmployeeID, FirstName, LastName, Role || null, ContactNumber || null, ReportsTo || null]
-    );
+    // Get the next EmployeeID using the helper
+    const nextEmployeeID = await getNextId('employee', 'EmployeeID');
+
+    try {
+      await db.execute(
+        'INSERT INTO employee (EmployeeID, FirstName, LastName, Role, ContactNumber, ReportsTo) VALUES (?, ?, ?, ?, ?, ?)',
+        [nextEmployeeID, FirstName, LastName, Role || null, ContactNumber || null, ReportsTo || null]
+      );
+    } catch (error: any) {
+      if (error.errno === 1062 || error.code === 'ER_DUP_ENTRY') {
+        return NextResponse.json({ error: 'Duplication error: Employee ID already exists.' }, { status: 409 });
+      }
+      throw error;
+    }
     return NextResponse.json({ id: nextEmployeeID }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/employees failed:', error.message);

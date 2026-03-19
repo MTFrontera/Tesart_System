@@ -14,6 +14,19 @@ interface Payment {
   CustomerLast?: string;
 }
 
+const formatToDatetimeLocal = (value: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mi = pad(date.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+};
+
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [form, setForm] = useState({
@@ -90,7 +103,7 @@ export default function PaymentsPage() {
     setEditingId(payment.PaymentID);
     setForm({
       OrderID: payment.OrderID?.toString() || '',
-      PaymentDate: payment.PaymentDate,
+      PaymentDate: formatToDatetimeLocal(payment.PaymentDate),
       PaymentMethod: payment.PaymentMethod,
       AmountPaid: payment.AmountPaid.toString(),
       PaymentStatus: payment.PaymentStatus,
@@ -134,7 +147,7 @@ export default function PaymentsPage() {
                   type="number"
                   className="form-control"
                   placeholder="Order ID"
-                  value={form.OrderID}
+                  value={form.OrderID ?? ''}
                   onChange={(e) => setForm({ ...form, OrderID: e.target.value })}
                   required
                 />
@@ -144,7 +157,7 @@ export default function PaymentsPage() {
                   type="datetime-local"
                   className="form-control"
                   placeholder="Payment Date"
-                  value={form.PaymentDate}
+                  value={form.PaymentDate ?? ''}
                   onChange={(e) => setForm({ ...form, PaymentDate: e.target.value })}
                   required
                 />
@@ -156,7 +169,7 @@ export default function PaymentsPage() {
                   type="text"
                   className="form-control"
                   placeholder="Payment Method"
-                  value={form.PaymentMethod}
+                  value={form.PaymentMethod ?? ''}
                   onChange={(e) => setForm({ ...form, PaymentMethod: e.target.value })}
                   required
                 />
@@ -167,7 +180,7 @@ export default function PaymentsPage() {
                   step="0.01"
                   className="form-control"
                   placeholder="Amount Paid"
-                  value={form.AmountPaid}
+                  value={form.AmountPaid ?? ''}
                   onChange={(e) => setForm({ ...form, AmountPaid: e.target.value })}
                   required
                 />
@@ -178,7 +191,7 @@ export default function PaymentsPage() {
                 type="text"
                 className="form-control"
                 placeholder="Payment Status"
-                value={form.PaymentStatus}
+                value={form.PaymentStatus ?? ''}
                 onChange={(e) => setForm({ ...form, PaymentStatus: e.target.value })}
                 required
               />

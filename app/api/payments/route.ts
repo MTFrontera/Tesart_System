@@ -29,22 +29,20 @@ export async function POST(request: NextRequest) {
     // Convert datetime-local string to proper timestamp
     const paymentDateTime = new Date(PaymentDate).toISOString();
     
-    // Get the next PaymentID by finding the max and adding 1
     try {
-      const [maxResults] = await db.execute('SELECT MAX(PaymentID) as maxId FROM payment');
-      const maxId = (maxResults && maxResults.length > 0) ? (maxResults[0] as any).maxId : 0;
-      const nextPaymentID = (maxId || 0) + 1;
-      
-      const [result] = await db.execute(
-        'INSERT INTO payment (PaymentID, OrderID, PaymentDate, PaymentMethod, AmountPaid, PaymentStatus) VALUES (?, ?, ?, ?, ?, ?)',
-        [nextPaymentID, OrderID, paymentDateTime, PaymentMethod, parseFloat(String(AmountPaid)), PaymentStatus]
+      const result = await db.execute(
+        'INSERT INTO payment (OrderID, PaymentDate, PaymentMethod, AmountPaid, PaymentStatus) VALUES (?, ?, ?, ?, ?)',
+        [OrderID, paymentDateTime, PaymentMethod, parseFloat(String(AmountPaid)), PaymentStatus]
       );
-      console.log('Payment added successfully:', { id: nextPaymentID, OrderID, PaymentDate: paymentDateTime, PaymentMethod, AmountPaid, PaymentStatus });
-      return NextResponse.json({ id: nextPaymentID }, { status: 201 });
-    } catch (dbError: any) {
-      console.error('Database error in payments POST:', dbError.message);
-      throw dbError;
+      const insertId = (result as any)[0]?.insertId || 0;
+      console.log('Payment added successfully:', { id: insertId, OrderID, PaymentDate: paymentDateTime, PaymentMethod, AmountPaid, PaymentStatus });
+    } catch (error: any) {
+      if (error.errno === 1062 || error.code === 'ER_DUP_ENTRY') {
+        return NextResponse.json({ error: 'Duplication error: Payment ID already exists.' }, { status: 409 });
+      }
+      throw error;
     }
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/payments error:', error.message);
     return NextResponse.json({ error: 'Failed to add payment', message: error?.message ?? String(error) }, { status: 500 });

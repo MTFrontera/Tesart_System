@@ -131,7 +131,7 @@ export default function EmployeesPage() {
                   type="text"
                   className="form-control"
                   placeholder="First Name"
-                  value={form.FirstName}
+                  value={form.FirstName ?? ''}
                   onChange={(e) => setForm({ ...form, FirstName: e.target.value })}
                   required
                 />
@@ -141,7 +141,7 @@ export default function EmployeesPage() {
                   type="text"
                   className="form-control"
                   placeholder="Last Name"
-                  value={form.LastName}
+                  value={form.LastName ?? ''}
                   onChange={(e) => setForm({ ...form, LastName: e.target.value })}
                   required
                 />
@@ -153,7 +153,7 @@ export default function EmployeesPage() {
                   type="text"
                   className="form-control"
                   placeholder="Role"
-                  value={form.Role}
+                  value={form.Role ?? ''}
                   onChange={(e) => setForm({ ...form, Role: e.target.value })}
                 />
               </div>
@@ -162,7 +162,7 @@ export default function EmployeesPage() {
                   type="text"
                   className="form-control"
                   placeholder="Contact Number"
-                  value={form.ContactNumber}
+                  value={form.ContactNumber ?? ''}
                   onChange={(e) => setForm({ ...form, ContactNumber: e.target.value })}
                 />
               </div>
@@ -171,7 +171,7 @@ export default function EmployeesPage() {
                   type="number"
                   className="form-control"
                   placeholder="Reports To (ID)"
-                  value={form.ReportsTo}
+                  value={form.ReportsTo ?? ''}
                   onChange={(e) => setForm({ ...form, ReportsTo: e.target.value })}
                 />
               </div>

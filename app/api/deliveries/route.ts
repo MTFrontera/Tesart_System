@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { getNextId } from '@/lib/idGenerator';
 
 export async function GET() {
   try {
     const [rows] = await db.execute(
-      `SELECT d.DeliveryID, d.DeliveryType, d.DeliveryDate, d.DeliveryStatus,
-              o.OrderID, c.FirstName AS CustomerFirst, c.LastName AS CustomerLast,
+      `SELECT d.DeliveryID, d.OrderID, d.DriverID, d.AssistantID, d.DeliveryType, d.DeliveryDate, d.DeliveryStatus,
+              c.FirstName AS CustomerFirst, c.LastName AS CustomerLast,
               driver.FirstName AS DriverFirst, driver.LastName AS DriverLast,
               assistant.FirstName AS AssistantFirst, assistant.LastName AS AssistantLast
        FROM delivery_pickup d
@@ -33,22 +34,22 @@ export async function POST(request: NextRequest) {
     // Convert datetime-local string to proper timestamp
     const deliveryDateTime = new Date(DeliveryDate).toISOString();
     
-    // Get the next DeliveryID by finding the max and adding 1
+    // Get the next DeliveryID using the helper
+    const nextDeliveryID = await getNextId('delivery_pickup', 'DeliveryID');
+    
     try {
-      const [maxResults] = await db.execute('SELECT MAX(DeliveryID) as maxId FROM delivery_pickup');
-      const maxId = (maxResults && maxResults.length > 0) ? (maxResults[0] as any).maxId : 0;
-      const nextDeliveryID = (maxId || 0) + 1;
-      
       await db.execute(
         'INSERT INTO delivery_pickup (DeliveryID, OrderID, DriverID, AssistantID, DeliveryType, DeliveryDate, DeliveryStatus) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [nextDeliveryID, OrderID, DriverID, AssistantID, DeliveryType, deliveryDateTime, DeliveryStatus]
       );
       console.log('Delivery added successfully:', { id: nextDeliveryID, OrderID, DriverID, AssistantID, DeliveryType, DeliveryDate: deliveryDateTime, DeliveryStatus });
-      return NextResponse.json({ id: nextDeliveryID }, { status: 201 });
-    } catch (dbError: any) {
-      console.error('Database error in deliveries POST:', dbError.message);
-      throw dbError;
+    } catch (error: any) {
+      if (error.errno === 1062 || error.code === 'ER_DUP_ENTRY') {
+        return NextResponse.json({ error: 'Duplication error: Delivery ID already exists.' }, { status: 409 });
+      }
+      throw error;
     }
+    return NextResponse.json({ id: nextDeliveryID }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/deliveries failed:', error);
     return NextResponse.json({ error: 'Failed to add delivery', message: error?.message ?? String(error) }, { status: 500 });

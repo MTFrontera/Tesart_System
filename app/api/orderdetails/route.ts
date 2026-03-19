@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { getNextId } from '@/lib/idGenerator';
 
 export async function GET() {
   try {
@@ -26,25 +27,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     
-    // Get the next OrderDetailID by finding the max and adding 1
-    try {
-      const [maxResults] = await db.execute('SELECT MAX(OrderDetailID) as maxId FROM orderdetails');
-      const maxId = (maxResults && maxResults.length > 0) ? (maxResults[0] as any).maxId : 0;
-      const nextOrderDetailID = (maxId || 0) + 1;
-      
+    // Get the next OrderDetailID using the helper
+    const nextOrderDetailID = await getNextId('orderdetails', 'OrderDetailID');
+    
       // Calculate subtotal if not provided
       const calculatedSubtotal = Subtotal || (parseFloat(String(Quantity)) * parseFloat(String(UnitPrice)));
       
+    try {
       await db.execute(
         'INSERT INTO orderdetails (OrderDetailID, OrderID, ProductID, Quantity, UnitPrice, Subtotal) VALUES (?, ?, ?, ?, ?, ?)',
         [nextOrderDetailID, OrderID, ProductID, parseInt(String(Quantity)), parseFloat(String(UnitPrice)), calculatedSubtotal]
       );
       console.log('Order detail added successfully:', { id: nextOrderDetailID, OrderID, ProductID, Quantity, UnitPrice, Subtotal: calculatedSubtotal });
-      return NextResponse.json({ id: nextOrderDetailID }, { status: 201 });
-    } catch (dbError: any) {
-      console.error('Database error in orderdetails POST:', dbError.message);
-      throw dbError;
+    } catch (error: any) {
+      if (error.errno === 1062 || error.code === 'ER_DUP_ENTRY') {
+        return NextResponse.json({ error: 'Duplication error: Order Detail ID already exists.' }, { status: 409 });
+      }
+      throw error;
     }
+    return NextResponse.json({ id: nextOrderDetailID }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/orderdetails error:', error.message);
     return NextResponse.json({ error: 'Failed to add order detail', message: error?.message ?? String(error) }, { status: 500 });

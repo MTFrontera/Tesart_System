@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 interface Customer {
-  customerid: number;
+  customerid: number | null;
   firstname: string;
   lastname: string;
   email: string;
@@ -14,7 +14,6 @@ interface Customer {
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [form, setForm] = useState({
-    CustomerID: '',
     FirstName: '',
     LastName: '',
     Email: '',
@@ -63,7 +62,6 @@ export default function CustomersPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            CustomerID: form.CustomerID ? parseInt(form.CustomerID) : undefined,
             FirstName: form.FirstName,
             LastName: form.LastName,
             Email: form.Email,
@@ -80,7 +78,7 @@ export default function CustomersPage() {
         alert('Customer added successfully');
       }
 
-      setForm({ CustomerID: '', FirstName: '', LastName: '', Email: '', PhoneNumber: '', Address: '' });
+      setForm({ FirstName: '', LastName: '', Email: '', PhoneNumber: '', Address: '' });
       setEditingId(null);
       fetchCustomers();
     } catch (error) {
@@ -92,7 +90,6 @@ export default function CustomersPage() {
   const startEdit = (customer: Customer) => {
     setEditingId(customer.customerid);
     setForm({
-      CustomerID: customer.customerid.toString(),
       FirstName: customer.firstname,
       LastName: customer.lastname,
       Email: customer.email,
@@ -104,17 +101,22 @@ export default function CustomersPage() {
 
   const cancelEdit = () => {
     setEditingId(null);
-    setForm({ CustomerID: '', FirstName: '', LastName: '', Email: '', PhoneNumber: '', Address: '' });
+    setForm({ FirstName: '', LastName: '', Email: '', PhoneNumber: '', Address: '' });
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (customer: Customer) => {
     if (!confirm('Are you sure you want to delete this customer?')) return;
-    
+
     try {
       const res = await fetch('/api/customers', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ CustomerID: id }),
+        body: JSON.stringify({
+          CustomerID: customer.customerid,
+          Email: customer.email,
+          PhoneNumber: customer.phonenumber,
+          Address: customer.address,
+        }),
       });
 
       if (!res.ok) {
@@ -138,32 +140,22 @@ export default function CustomersPage() {
           <h5 className="card-title">{editingId ? 'Edit Customer' : 'Add New Customer'}</h5>
           <form onSubmit={handleSubmit}>
             <div className="row">
-              <div className="col-md-2">
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="Customer ID (optional)"
-                  value={form.CustomerID}
-                  onChange={(e) => setForm({ ...form, CustomerID: e.target.value })}
-                  disabled={editingId !== null}
-                />
-              </div>
-              <div className="col-md-5">
+              <div className="col-md-6">
                 <input
                   type="text"
                   className="form-control"
                   placeholder="First Name"
-                  value={form.FirstName}
+                  value={form.FirstName ?? ''}
                   onChange={(e) => setForm({ ...form, FirstName: e.target.value })}
                   required
                 />
               </div>
-              <div className="col-md-5">
+              <div className="col-md-6">
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Last Name"
-                  value={form.LastName}
+                  value={form.LastName ?? ''}
                   onChange={(e) => setForm({ ...form, LastName: e.target.value })}
                   required
                 />
@@ -175,7 +167,7 @@ export default function CustomersPage() {
                   type="email"
                   className="form-control"
                   placeholder="Email"
-                  value={form.Email}
+                  value={form.Email ?? ''}
                   onChange={(e) => setForm({ ...form, Email: e.target.value })}
                 />
               </div>
@@ -184,7 +176,7 @@ export default function CustomersPage() {
                   type="text"
                   className="form-control"
                   placeholder="Phone Number"
-                  value={form.PhoneNumber}
+                  value={form.PhoneNumber ?? ''}
                   onChange={(e) => setForm({ ...form, PhoneNumber: e.target.value })}
                 />
               </div>
@@ -194,7 +186,7 @@ export default function CustomersPage() {
                 type="text"
                 className="form-control"
                 placeholder="Address"
-                value={form.Address}
+                value={form.Address ?? ''}
                 onChange={(e) => setForm({ ...form, Address: e.target.value })}
               />
             </div>
@@ -228,7 +220,7 @@ export default function CustomersPage() {
                   <td>{customer.address}</td>
                   <td>
                     <button className="btn btn-sm btn-warning me-2" onClick={() => startEdit(customer)}>Edit</button>
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(customer.customerid)}>Delete</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(customer)}>Delete</button>
                   </td>
                 </tr>
               ))}

@@ -21,12 +21,12 @@ export default function RootLayout({
         <nav className="custom-navbar">
           <div className="nav-links">
             <Link href="/" className="active">Dashboard</Link>
-            <Link href="/customers">Customers</Link>
             <Link href="/employees">Employees</Link>
             <Link href="/products">Products</Link>
+            <Link href="/inventory">Inventory</Link>
+            <Link href="/customers">Customers</Link>
             <Link href="/orders">Orders</Link>
             <Link href="/orderdetails">Order Details</Link>
-            <Link href="/inventory">Inventory</Link>
             <Link href="/payments">Payments</Link>
             <Link href="/deliveries">Deliveries</Link>
           </div>

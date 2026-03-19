@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { getNextId } from '@/lib/idGenerator';
 
 export async function GET() {
   try {
     const [rows] = await db.execute(
-      `SELECT i.InventoryID, i.StockQuantity, i.LastUpdated, p.ProductName
+      `SELECT i.InventoryID, i.ProductID, i.StockQuantity, i.LastUpdated, p.ProductName
        FROM inventory i
        LEFT JOIN product p ON i.ProductID = p.ProductID`
     );
@@ -23,12 +24,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     
+      // Get the next InventoryID using the helper
+    const nextInventoryID = await getNextId('inventory', 'InventoryID');
+
     const lastUpdated = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    const [result] = await db.execute(
-      'INSERT INTO inventory (ProductID, StockQuantity, LastUpdated) VALUES (?, ?, ?)',
-      [ProductID, StockQuantity, lastUpdated]
-    );
-    return NextResponse.json({ id: (result as any).insertId }, { status: 201 });
+    try {
+      await db.execute(
+        'INSERT INTO inventory (InventoryID, ProductID, StockQuantity, LastUpdated) VALUES (?, ?, ?, ?)',
+        [nextInventoryID, ProductID, StockQuantity, lastUpdated]
+      );
+    } catch (error: any) {
+      if (error.errno === 1062 || error.code === 'ER_DUP_ENTRY') {
+        return NextResponse.json({ error: 'Duplication error: Inventory ID already exists.' }, { status: 409 });
+      }
+      throw error;
+    }
+    return NextResponse.json({ id: nextInventoryID }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/inventory failed:', error);
     return NextResponse.json({ error: 'Failed to add inventory', message: error?.message ?? String(error) }, { status: 500 });

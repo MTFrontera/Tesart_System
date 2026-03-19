@@ -123,54 +123,59 @@ export default function ProductsPage() {
           <h5 className="card-title">{editingId ? 'Edit Product' : 'Add New Product'}</h5>
           <form onSubmit={handleSubmit}>
             <div className="row">
-              <div className="col-md-6">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Product Name</label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Product Name"
-                  value={form.ProductName}
+                  value={form.ProductName ?? ''}
                   onChange={(e) => setForm({ ...form, ProductName: e.target.value })}
                   required
                 />
               </div>
-              <div className="col-md-6">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Category</label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Category"
-                  value={form.Category}
+                  value={form.Category ?? ''}
                   onChange={(e) => setForm({ ...form, Category: e.target.value })}
                 />
               </div>
             </div>
-            <div className="row mt-2">
-              <div className="col-md-6">
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Unit Price</label>
                 <input
                   type="number"
                   step="0.01"
                   className="form-control"
                   placeholder="Unit Price"
-                  value={form.UnitPrice}
+                  value={form.UnitPrice ?? ''}
                   onChange={(e) => setForm({ ...form, UnitPrice: e.target.value })}
                 />
               </div>
-              <div className="col-md-6">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Return Policy</label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Return Policy"
-                  value={form.ReturnPolicy}
+                  placeholder="e.g., 30 days"
+                  value={form.ReturnPolicy ?? ''}
                   onChange={(e) => setForm({ ...form, ReturnPolicy: e.target.value })}
                 />
               </div>
             </div>
-            <div className="row mt-2">
-              <div className="col-md-12">
+            <div className="row">
+              <div className="col-md-12 mb-3">
+                <label className="form-label">Warranty</label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Warranty"
-                  value={form.Warranty}
+                  placeholder="e.g., 1 year"
+                  value={form.Warranty ?? ''}
                   onChange={(e) => setForm({ ...form, Warranty: e.target.value })}
                 />
               </div>
@@ -191,6 +196,7 @@ export default function ProductsPage() {
                 <th>Name</th>
                 <th>Category</th>
                 <th>Price</th>
+                <th>Return Policy</th>
                 <th>Warranty</th>
                 <th>Actions</th>
               </tr>
@@ -202,6 +208,7 @@ export default function ProductsPage() {
                   <td>{product.ProductName}</td>
                   <td>{product.Category}</td>
                   <td>₱{Number(product.UnitPrice).toFixed(2)}</td>
+                  <td>{product.ReturnPolicy}</td>
                   <td>{product.Warranty}</td>
                   <td>
                     <button className="btn btn-sm btn-warning me-2" onClick={() => startEdit(product)}>Edit</button>

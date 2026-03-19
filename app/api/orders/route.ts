@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { getNextId } from '@/lib/idGenerator';
 
 export async function GET() {
   try {
     const [rows] = await db.execute(
-      `SELECT o.OrderID, o.OrderDate, o.OrderStatus, o.DeliveryMethod, o.TotalAmount,
+      `SELECT o.OrderID, o.CustomerID, o.EmployeeID, o.OrderDate, o.OrderStatus, o.DeliveryMethod, o.TotalAmount,
               c.FirstName AS CustomerFirst, c.LastName AS CustomerLast,
               e.FirstName AS EmployeeFirst, e.LastName AS EmployeeLast
        FROM \`order\` o
@@ -30,21 +31,21 @@ export async function POST(request: NextRequest) {
     // Convert datetime-local string to proper timestamp
     const orderDateTime = new Date(OrderDate).toISOString();
     
-    // Get the next OrderID by finding the max and adding 1
+    // Get the next OrderID using the helper
+    const nextOrderID = await getNextId('`order`', 'OrderID');
+    
     try {
-      const [maxResults] = await db.execute('SELECT MAX(OrderID) as maxId FROM `order`');
-      const maxId = (maxResults && maxResults.length > 0) ? (maxResults[0] as any).maxId : 0;
-      const nextOrderID = (maxId || 0) + 1;
-      
       await db.execute(
         'INSERT INTO `order` (OrderID, CustomerID, EmployeeID, OrderDate, OrderStatus, DeliveryMethod, TotalAmount) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [nextOrderID, CustomerID, EmployeeID, orderDateTime, OrderStatus, DeliveryMethod, parseFloat(String(TotalAmount))]
       );
-      return NextResponse.json({ id: nextOrderID }, { status: 201 });
-    } catch (dbError: any) {
-      console.error('Database error in orders POST:', dbError.message);
-      throw dbError;
+    } catch (error: any) {
+      if (error.errno === 1062 || error.code === 'ER_DUP_ENTRY') {
+        return NextResponse.json({ error: 'Duplication error: Order ID already exists.' }, { status: 409 });
+      }
+      throw error;
     }
+    return NextResponse.json({ id: nextOrderID }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/orders failed:', error);
     return NextResponse.json({ error: 'Failed to add order', message: error?.message ?? String(error) }, { status: 500 });

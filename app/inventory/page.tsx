@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 interface InventoryRecord {
   InventoryID: number;
+  ProductID: number;
   StockQuantity: number;
   LastUpdated: string;
   ProductName?: string;
@@ -71,7 +72,7 @@ export default function InventoryPage() {
   const startEdit = (item: InventoryRecord) => {
     setEditingId(item.InventoryID);
     setForm({
-      ProductID: item.InventoryID.toString(),
+      ProductID: item.ProductID.toString(),
       StockQuantity: item.StockQuantity.toString(),
     });
   };
@@ -113,7 +114,7 @@ export default function InventoryPage() {
                   type="number"
                   className="form-control"
                   placeholder="Product ID"
-                  value={form.ProductID}
+                  value={form.ProductID ?? ''}
                   onChange={(e) => setForm({ ...form, ProductID: e.target.value })}
                   required
                 />
@@ -123,7 +124,7 @@ export default function InventoryPage() {
                   type="number"
                   className="form-control"
                   placeholder="Stock Quantity"
-                  value={form.StockQuantity}
+                  value={form.StockQuantity ?? ''}
                   onChange={(e) => setForm({ ...form, StockQuantity: e.target.value })}
                   required
                 />

@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 
 interface Delivery {
   DeliveryID: number;
+  OrderID?: number;
+  DriverID?: number;
+  AssistantID?: number;
   DeliveryType: string;
   DeliveryDate: string;
   DeliveryStatus: string;
-  OrderID?: number;
   CustomerFirst?: string;
   CustomerLast?: string;
   DriverFirst?: string;
@@ -15,6 +17,19 @@ interface Delivery {
   AssistantFirst?: string;
   AssistantLast?: string;
 }
+
+const formatToDatetimeLocal = (value: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mi = pad(date.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+};
 
 export default function DeliveriesPage() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
@@ -92,10 +107,10 @@ export default function DeliveriesPage() {
     setForm({
       OrderID: delivery.OrderID?.toString() || '',
       DeliveryType: delivery.DeliveryType,
-      DeliveryDate: delivery.DeliveryDate,
+      DeliveryDate: formatToDatetimeLocal(delivery.DeliveryDate),
       DeliveryStatus: delivery.DeliveryStatus,
-      DriverID: delivery.DeliveryID.toString(),
-      AssistantID: delivery.DeliveryID.toString(),
+      DriverID: delivery.DriverID?.toString() || '',
+      AssistantID: delivery.AssistantID?.toString() || '',
     });
   };
 
@@ -136,7 +151,7 @@ export default function DeliveriesPage() {
                   type="number"
                   className="form-control"
                   placeholder="Order ID"
-                  value={form.OrderID}
+                  value={form.OrderID ?? ''}
                   onChange={(e) => setForm({ ...form, OrderID: e.target.value })}
                   required
                 />
@@ -146,7 +161,7 @@ export default function DeliveriesPage() {
                   type="text"
                   className="form-control"
                   placeholder="Delivery Type"
-                  value={form.DeliveryType}
+                  value={form.DeliveryType ?? ''}
                   onChange={(e) => setForm({ ...form, DeliveryType: e.target.value })}
                   required
                 />
@@ -156,7 +171,7 @@ export default function DeliveriesPage() {
                   type="datetime-local"
                   className="form-control"
                   placeholder="Delivery Date"
-                  value={form.DeliveryDate}
+                  value={form.DeliveryDate ?? ''}
                   onChange={(e) => setForm({ ...form, DeliveryDate: e.target.value })}
                   required
                 />
@@ -166,7 +181,7 @@ export default function DeliveriesPage() {
                   type="text"
                   className="form-control"
                   placeholder="Delivery Status"
-                  value={form.DeliveryStatus}
+                  value={form.DeliveryStatus ?? ''}
                   onChange={(e) => setForm({ ...form, DeliveryStatus: e.target.value })}
                   required
                 />
@@ -178,7 +193,7 @@ export default function DeliveriesPage() {
                   type="number"
                   className="form-control"
                   placeholder="Driver ID"
-                  value={form.DriverID}
+                  value={form.DriverID ?? ''}
                   onChange={(e) => setForm({ ...form, DriverID: e.target.value })}
                   required
                 />
@@ -188,7 +203,7 @@ export default function DeliveriesPage() {
                   type="number"
                   className="form-control"
                   placeholder="Assistant ID"
-                  value={form.AssistantID}
+                  value={form.AssistantID ?? ''}
                   onChange={(e) => setForm({ ...form, AssistantID: e.target.value })}
                   required
                 />

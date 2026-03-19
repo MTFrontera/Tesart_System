@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 interface Order {
   OrderID: number;
+  CustomerID: number;
+  EmployeeID: number;
   OrderDate: string;
   OrderStatus: string;
   DeliveryMethod: string;
@@ -13,6 +15,19 @@ interface Order {
   EmployeeFirst?: string;
   EmployeeLast?: string;
 }
+
+const formatToDatetimeLocal = (value: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mi = pad(date.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+};
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -88,9 +103,9 @@ export default function OrdersPage() {
   const startEdit = (order: Order) => {
     setEditingId(order.OrderID);
     setForm({
-      CustomerID: order.OrderID.toString(),
-      EmployeeID: order.OrderID.toString(),
-      OrderDate: order.OrderDate,
+      CustomerID: order.CustomerID?.toString() ?? '',
+      EmployeeID: order.EmployeeID?.toString() ?? '',
+      OrderDate: formatToDatetimeLocal(order.OrderDate),
       OrderStatus: order.OrderStatus,
       DeliveryMethod: order.DeliveryMethod,
       TotalAmount: order.TotalAmount.toString(),
@@ -134,7 +149,7 @@ export default function OrdersPage() {
                   type="number"
                   className="form-control"
                   placeholder="Customer ID"
-                  value={form.CustomerID}
+                  value={form.CustomerID ?? ''}
                   onChange={(e) => setForm({ ...form, CustomerID: e.target.value })}
                   required
                 />
@@ -144,7 +159,7 @@ export default function OrdersPage() {
                   type="number"
                   className="form-control"
                   placeholder="Employee ID"
-                  value={form.EmployeeID}
+                  value={form.EmployeeID ?? ''}
                   onChange={(e) => setForm({ ...form, EmployeeID: e.target.value })}
                   required
                 />
@@ -154,7 +169,7 @@ export default function OrdersPage() {
                   type="datetime-local"
                   className="form-control"
                   placeholder="Order Date"
-                  value={form.OrderDate}
+                  value={form.OrderDate ?? ''}
                   onChange={(e) => setForm({ ...form, OrderDate: e.target.value })}
                   required
                 />
@@ -164,7 +179,7 @@ export default function OrdersPage() {
                   type="text"
                   className="form-control"
                   placeholder="Delivery Method"
-                  value={form.DeliveryMethod}
+                  value={form.DeliveryMethod ?? ''}
                   onChange={(e) => setForm({ ...form, DeliveryMethod: e.target.value })}
                   required
                 />
@@ -176,7 +191,7 @@ export default function OrdersPage() {
                   type="text"
                   className="form-control"
                   placeholder="Order Status"
-                  value={form.OrderStatus}
+                  value={form.OrderStatus ?? ''}
                   onChange={(e) => setForm({ ...form, OrderStatus: e.target.value })}
                   required
                 />
@@ -187,7 +202,7 @@ export default function OrdersPage() {
                   step="0.01"
                   className="form-control"
                   placeholder="Total Amount"
-                  value={form.TotalAmount}
+                  value={form.TotalAmount ?? ''}
                   onChange={(e) => setForm({ ...form, TotalAmount: e.target.value })}
                   required
                 />

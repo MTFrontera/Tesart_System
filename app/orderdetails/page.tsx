@@ -168,7 +168,7 @@ export default function OrderDetailsPage() {
                   type="number"
                   className="form-control"
                   placeholder="Order ID"
-                  value={form.OrderID}
+                  value={form.OrderID ?? ''}
                   onChange={(e) => setForm({ ...form, OrderID: e.target.value })}
                   required
                 />
@@ -195,7 +195,7 @@ export default function OrderDetailsPage() {
                   type="number"
                   className="form-control"
                   placeholder="Quantity"
-                  value={form.Quantity}
+                  value={form.Quantity ?? ''}
                   onChange={(e) => setForm({ ...form, Quantity: e.target.value })}
                   required
                 />
@@ -206,7 +206,7 @@ export default function OrderDetailsPage() {
                   step="0.01"
                   className="form-control"
                   placeholder="Unit Price"
-                  value={form.UnitPrice}
+                  value={form.UnitPrice ?? ''}
                   onChange={(e) => setForm({ ...form, UnitPrice: e.target.value })}
                   required
                 />
