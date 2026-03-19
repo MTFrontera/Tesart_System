@@ -1,0 +1,111 @@
+/* [project]/app/globals.css [app-client] (css) */
+body {
+  background-color: #f4f6f9;
+  font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.custom-navbar {
+  background-color: #1a3b5c;
+  border-bottom: 3px solid #dc3545;
+  padding: 10px 20px;
+}
+
+.nav-links {
+  flex-wrap: wrap;
+  gap: 5px;
+  display: flex;
+}
+
+.nav-links a {
+  color: #a9b7c6;
+  border: 1px solid #0000;
+  border-radius: 4px;
+  margin: 0 2px;
+  padding: 8px 12px;
+  font-size: .85rem;
+  text-decoration: none;
+  transition: all .3s;
+}
+
+.nav-links a:hover {
+  color: #fff;
+  background-color: #dc35451a;
+  border-color: #dc3545;
+}
+
+.nav-links a.active {
+  color: #fff;
+  background-color: #dc3545;
+  font-weight: bold;
+}
+
+.page-title {
+  color: #1a3b5c;
+  border-left: 5px solid #dc3545;
+  padding-left: 15px;
+  font-weight: 600;
+}
+
+.card {
+  border: none;
+  border-top: 3px solid #1a3b5c;
+  transition: transform .2s;
+}
+
+.card.stat-card {
+  border-top: 4px solid #dc3545 !important;
+}
+
+.add-form-card {
+  border: 1px solid #e0e0e0;
+}
+
+.btn-custom {
+  color: #fff;
+  background-color: #1a3b5c;
+  border: none;
+  font-weight: 500;
+}
+
+.btn-custom:hover {
+  color: #fff;
+  background-color: #dc3545;
+}
+
+.btn-remove {
+  color: #dc3545;
+  background-color: #fff;
+  border: 1px solid #f5c2c7;
+  padding: 2px 10px;
+  font-size: .85rem;
+}
+
+.btn-remove:hover {
+  color: #fff;
+  background-color: #dc3545;
+}
+
+thead.table-dark {
+  background-color: #1a3b5c;
+}
+
+th {
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  font-size: .85rem;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dc3545;
+  border-radius: 10px;
+}
+
+/*# sourceMappingURL=app_globals_71f961d1.css.map*/
